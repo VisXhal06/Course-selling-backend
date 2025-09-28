@@ -1,48 +1,75 @@
-const { Router } = require('express');
+const { Router } = require("express");
 const adminRouter = Router();
-const { adminModel } = require('../db');
+const { adminModel } = require("../db");
 
-adminRouter.post("/signup", function(req, res) {
-    res.json({
-        message: "Admin signed up successfully"
-    })
-}
-)
+const jwt = require("jsonwebtoken");
+const JWT_ADMIN_PASSWORD = "Vishal0604";
 
-adminRouter.post("/signin", function(req, res) {
-    res.json({
-        message: "Admin signed in successfully"
-    })
-}
-)
+adminRouter.post("/signup", async function (req, res) {
+  const { email, password, firstName, lastName } = req.body;
 
-adminRouter.post("/create-course", function(req, res) {
-    res.json({
-        message: "Course created successfully"
-    })
-})
+  await adminModel.create({
+    email: email,
+    password: password,
+    firstName: firstName,
+    lastName: lastName,
+  });
 
-adminRouter.post("/delete-course", function(req, res) {
-    res.json({
-        message: "Course deleted successfully"
-    })
-}
-)
+  res.json({
+    message: "User signed up successfully",
+  });
+});
 
-adminRouter.post("/course/bulk", function(req, res) {
-    res.json({
-        message: "Course generated successfully"
-    })
-}
-)
+adminRouter.post("/signin", async function (req, res) {
+  const { email, password } = req.body;
 
-adminRouter.get("/all-users", function(req, res) {
+  const admin = await adminModel.findOne({
+    email: email,
+    password: password,
+  });
+
+  if (admin) {
+    const token = jwt.sign(
+      {
+        id: admin._id,
+      },
+      JWT_ADMIN_PASSWORD
+    );
+
     res.json({
-        message: "List of all users"
-    })
-}
-)
+      token: token,
+    });
+  } else {
+    res.status(403).json({
+      message: "Admin not found",
+    });
+  }
+});
+
+adminRouter.post("/create-course", function (req, res) {
+  res.json({
+    message: "Course created successfully",
+  });
+});
+
+adminRouter.post("/delete-course", function (req, res) {
+  res.json({
+    message: "Course deleted successfully",
+  });
+});
+
+adminRouter.post("/course/bulk", function (req, res) {
+  res.json({
+    message: "Course generated successfully",
+  });
+});
+
+adminRouter.get("/all-users", function (req, res) {
+  res.json({
+    message: "List of all users",
+  });
+});
 
 module.exports = {
-    adminRouter: adminRouter
-}
+  adminRouter: adminRouter,
+};
