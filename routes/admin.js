@@ -67,15 +67,36 @@ adminRouter.post("/course", adminMidlleware,function (req, res) {
   });
 });
 
-adminRouter.post("/delete-course", function (req, res) {
+adminRouter.put("/course/update", adminMidlleware, async function (req, res) {
+  const adminId = req.adminId;
+  const { title, description, price, imageLink, published, courseId } = req.body;
+
+  const course = await courseModel.updateOne({
+      _id: courseId,
+      createorId: adminId 
+  }, {
+    title: title,
+    description: description,
+    price: price,
+    imageLink: imageLink,  
+  });
+
   res.json({
-    message: "Course deleted successfully",
+    message: "Course Updated",
+    courseId: course._id
   });
 });
 
-adminRouter.post("/course/bulk", function (req, res) {
+adminRouter.get("/course/bulk", adminMidlleware, async function (req, res) {
+  
+  const adminId = req.userId
+  const courses = await courseModel.find({
+      createorId: adminId 
+  });
+
   res.json({
-    message: "Course generated successfully",
+    message: "Course Updated",
+    courses
   });
 });
 
